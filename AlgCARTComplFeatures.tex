@@ -1,0 +1,162 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{corollary}{Corollary}
+
+
+\begin{document}
+
+\title{Algorithm of Building Regression Decision Tree Using Complementary Features \\
+% Don't use Sub-titles !!! 	 
+}
+
+\author{\IEEEauthorblockN{Sergey Saltykov} % For  the only author delete "1st"
+\IEEEauthorblockA{\textit{Laboratory of Economic dynamics and innovation management} \\
+\textit{V.A. Trapeznikov Institute of Control Sciences of RAS}\\
+Moscow, Russia \\
+sergey.saltykov@gmail.com}
+}
+
+\maketitle
+\IEEEoverridecommandlockouts
+\IEEEpubid{\begin{minipage}[t]{\textwidth}\ \\[14pt]
+        \normalsize{978-1-7281-1094-3/20/\$31.00 \copyright2020 IEEE}
+\end{minipage}} 
+
+\begin{abstract}
+The paper shows that the use of information on complementary features can, all other things being equal, improve the accuracy of the regression decision trees, as well as make them more plausible.
+\end{abstract}
+
+\begin{IEEEkeywords}
+explainable artificial intelligence, complementary features
+\end{IEEEkeywords}
+
+\section{Introduction}
+In the so-called explained artificial intelligence, there is a need to build small models, but accurate and intuitive for the analyst. It is necessary to formalize, which models are perceived by analysts and decision-makers as intuitively understandable, plausible.
+
+
+How to create a small but fairly accurate regression decision-making tree? The naive way to do this is to use the CART method \cite{cart}. It is known that it finds the suboptimal solution, so there is a reserve to increase accuracy. But how do you use it and what can it be?
+
+
+It's possible that there are two features, each of which is a rather weak predictor, but together they are a strong predictor. At the same time, in the same dataset, there is a third feature, which is a medium strength predictor. The search for a suboptimal solution in CART is designed in such a way that the third feature will interfere with the use of a pair of the first two features, as each step selects a split feature, which gives the greatest explanatory power. If the third feature is removed from the dataset, a tree may be formed in which there is both the first and second feature in the chain. And the accuracy of such a tree may be higher than the tree formed on the dataset of three features. It is paradoxical, but the addition to the dataset of two features of the third feature may not only not increase the model that is generated on this dataset, but even significantly reduce it. Thus, removing some of the features from the dataset may increase the accuracy of the model being created. This heuristic method, for example, is used in the random forrest method \cite{RF}.
+
+
+Thus, having searched some number of decision trees built on datasets with different set of features, it is possible to choose a tree with acceptable accuracy.
+
+
+But how it is possible to reduce number of variants being tested and whether it is always necessary to do it? It is possible for tasks from some subject area to accumulate information about such pairs of features, which separately are weak predictors, but together quite strong. Then the number of trees to be searched can be reduced, perhaps, by several times. It turns out that if we have a need to build a large number of explanatory trees from a certain subject area, the cost of identifying key characteristics of this area in the form of pairs of complementary features may be justified.
+
+
+Thus, the relevance of the study is determined by the fact that now there is a need to generate a large number of explanatory models, and at the time of the method creation there was no such need.
+
+\section{Description of the decision tree with complementary feature}
+
+Suppose that such information accompanying the dataset could be information that one feature is complementary in some sense to another one. 
+
+
+This means that one feature helps to show, "illuminate" that there are subsets in the dataset, on which the second feature has a qualitatively different predictive power relative to the target. It is noteworthy that, as we will see in the example below, the values of the second feature sometimes can not point to the demarcation line between these two subsets. To distinguish between these two subsets, you need the values of the first fictitious feature. The first feature acts as an additional, complementary to the second feature, in order to be able to point to subsets with qualitatively different properties and which, therefore, it makes sense (reasonable) to place in different leaf elements of the decision tree, which is the solution to the problem of regression.
+
+
+Once again: we assume that in order for the regression tree to be the most accurate, it is worthwhile to place the average values on the most homogeneous in some sense selections, i.e. on the most similar to the leading sub-samples with respect to the prediction of a target, in the leaf elements of this tree. And this hypothesis should be tested on specific datasets - both synthetic and natural. Moreover, it seems to us that this approach can not only improve the accuracy of the trained model, but also create a model that is perceived by analysts and decision makers as more plausible. Indeed, if we know that complementary feathers together can point to a subsample on which it is appropriate to average, then if one of the complementary feathers is present in some chain of the decision tree, but there is no second, then the analyst feels that the opportunity to average on a sufficiently homogeneous subsample has been missed. And the analyst will probably think that this will affect the accuracy of the model. That is, in tree chains, complementary feathers should either occur in pairs or not at all. Otherwise, this regression tree may not look plausible enough.
+
+
+The relation of complementarity is generally asymmetric and antireflexive. Indeed, if it is known that the values of the first feature allow to identify sub-samples on which the values of the second feature predict targeting qualitatively differently, it does not follow that the values of the second feature will identify sub-samples on which the values of the first feature predict targeting qualitatively differently. On the other hand, in the decision tree chain complementary features can be located in any order and still they together allow to point to a subsample, on which it is reasonable to average the values. Thus, in order to formulate one of the conditions for the plausibility of the decision tree, it is advisable to move from the complementary relation to the symmetrical antireflexive relation derived from it, which we will call the paired relation. In terms of this relation, the formulation of the condition of plausibility of the regression tree will be shorter and more understandable.
+
+
+Thus, we have formulated the hypothesis that the addition to the dataset of an additional information structure, namely, the complementary binary relation on the set of features, will improve the accuracy of prediction of the target variable by the regression decision tree for a certain class of cases. Let's demonstrate it on a synthetic dataset. Extensive testing on many other synthetic as well as natural datasets is yet to be done in the following works.
+
+
+Thus, there is now a need to move from a two-part model of "training - fitting" to a three-part model of "pretraining - fine-tuning - fitting" in the construction of regression trees of decision-making within the framework of explained artificial intelligence, similar to what has already been done in the natural processing language, such as the BERT method \cite{BERT}.
+
+\section{Complementary feature and plausibility}
+
+Say that it's true that $f_1 R f_2$ on given dataset $D$ for given $p$ and $\gamma < 0,$ if $\exists\alpha,\beta(\texttt{CorrMul}_{\alpha,\beta}^{D,p}(f_1, f_2) < \gamma)$. In other words, define $R \subseteq F^2,$ where $F = \{f_i\}$  -- set of features. So $R = \{(f_1, f_2) \mid \exists\alpha,\beta(\texttt{CorrMul}_{\alpha,\beta}^{D,p}(f_1, f_2) < \gamma)\} $.
+
+\begin{algorithm}
+\SetAlgoLined
+\KwData{$D - $dataset, $p - $p-value, $\alpha, \beta - $thresholds, $f_1, f_2 - $features}
+\KwResult{Production of correlation}
+
+$D_{\alpha} \gets D[D(f_1) < \alpha]$\;
+$D_{\beta} \gets D[D(f_1) < \beta]$\;
+$\rho_{\alpha}, p_{\alpha} \gets \texttt{Correlation}(D_{\alpha}(f_2), D(t)) $\;
+$\rho_{\beta}, p_{\beta} \gets \texttt{Correlation}(D_{\beta}(f_2), D(t)) $\;
+\eIf {$p_{\alpha} \leq p$ \textbf{and} $p_{\beta} \leq p$}{
+$\rho \gets \rho_{\alpha} \rho_{\beta}$\;
+}{
+$\rho \gets 0$\;
+}
+
+ \Return $\rho$
+ \caption{CorrMul}
+\end{algorithm}
+
+Let we have binary relation $R$ on set $F$. We know that we can define domain of the binary relation as $\texttt{Dom} R = \{x \mid \exists y ((x, y) \in R)\}$ and range of the binary relation as $\texttt{Im} R = \{y \mid \exists x ((x, y) \in R)\}$. Now we can define set of all element in the given binary relation $\texttt{Elem} R = \texttt{Dom} R \cup \texttt{Im} R$. Now we can define binary relation of "paired features" $R^* = R \cup R^{-1} \cup \{(x, y) \mid x = y= \texttt{Elem} R\}$ .
+Let we have binary decision tree with two levels. Let one vertex of the first level -- the root -- has feature $x$. Let vertexes of second level have features $y_1$ and $y_2$. Than formulate the condition on features of plausible decision tree: $(x, y_1, y_2 \in F  \setminus \texttt{Elem} R) \lor (xRy_1 \land xRy_2)$. In words we can say that two-levels desicion tree seems to be plausible if features in all vertexes are not the elements of complementary binary relation or if features in each two chains in the tree are paired features.    
+
+\section{Algorithm of building decision tree}
+
+\begin{algorithm}
+\SetAlgoLined
+\KwData{$d - $dataset, $R - $complementary binary relation, $m - $maximum number of trees}
+\KwResult{Optimal decision tree}
+ $f \gets$ \texttt{getNumOfFeatures}($d$)\;
+ 
+ \eIf{$m > \abs{R}$}{
+   $n \gets m - \abs{R}$\;
+   }{
+   $n \gets 0$\;
+  }
+ 
+ $T \gets \emptyset$\;
+ \ForEach {$r \in R$}{
+  $F \gets$ \texttt{getFeaturesIDs}($r$)\;
+  $t \gets$ \texttt{CART}$_d$($F$)\; 
+  $T \gets T \cup \{t\}$\;
+ }
+ \For {$i = 1$ \KwTo $n$}{
+  $F \gets$ \texttt{RandomSet}$\left( \left[\sqrt{f}\right], f \right) $\;
+  $t \gets$ \texttt{CART}$_d$($F$)\;
+  $T \gets T \cup \{t\}$\;
+ }
+ 
+ $k \gets \arg\max_i$ \texttt{Score}($T_i$)\;
+ \Return $T_k$
+ 
+ \caption{Decision Tree with Complem. Features}
+\end{algorithm}
+
+\section{Discussions}
+
+This paper \cite{mlsd2020} analyzes the relationship between the RINC science metrics and the number of Web of Science (WoS) citations for different groups of researchers. It is shown, that for researchers of "average tier" the greatest correlation with number of citations on WoS from indicators in RINC has the average impact factor of magazines in which the works are published. This is an argument in favor of the fact that such researchers should focus more on the quality of papers than on the quantity, if their goal - high citations by WoS. It is also demonstrated that for such researchers the number of articles in Russian journals (including those from the list of the Higher Attestation Commission) has a negative correlation with the number of citations by WoS. This can be interpreted as follows: it is not reasonable for beginners and researchers of the "middle echelon" to focus on an excessive increase in the number of publications in Russian journals that are not part of the RINC core, as this may lead to a move away from the creation of works that can gain international recognition.
+
+\begin{thebibliography}{00}
+\bibitem{mlsd2020} S. A. Saltykov, ``Correlation of scientometric indicators from the RINC with citations based on Web of Science,'' MLSD 2020, in press.
+\bibitem{cart} Breiman, Leo; Friedman, J. H.; Olshen, R. A.; Stone, C. J. (1984). ``Classification and regression trees''. Monterey, CA: Wadsworth and Brooks/Cole Advanced Books and Software. ISBN 978-0-412-04841-8.
+\bibitem{RF} Ho, Tin Kam (1995). ``Random Decision Forests''. Proceedings of the 3rd International Conference on Document Analysis and Recognition, Montreal, QC, 14–16 August 1995. pp. 278–282.
+\bibitem{BERT} Devlin, Jacob, et al. "Bert: Pre-training of deep bidirectional transformers for language understanding." arXiv preprint arXiv:1810.04805 (2018).
+\end{thebibliography}
+
+\end{document}
